@@ -9,6 +9,8 @@ import Login from './Pages/Login'
 import Projects from './Pages/Projects'
 import Reg from './Pages/Reg'
 import Auth from './Pages/Auth'
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function App() {
 
@@ -26,6 +28,8 @@ function App() {
 
     </Routes>
       
+     
+
     </>
   )
 }
