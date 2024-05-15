@@ -39,3 +39,14 @@ export const userprojects =async(headers)=>{
 }
 
 
+export const editprojects = async(id,data,header)=>{
+
+    return await CommponApi("PUT",`${base_url}/editprojects/${id}`,data,header)
+
+}
+
+export const deleteproject =async(id,header)=>{
+
+    return await CommponApi("DELETE",`${base_url}/deleteprojects/${id}`,{},header)
+
+}

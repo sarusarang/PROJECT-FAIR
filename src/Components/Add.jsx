@@ -1,17 +1,19 @@
 import React from 'react'
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useContext } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { Row, Col } from 'react-bootstrap'
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import { toast, ToastContainer } from 'react-toastify';
-
-
+import { addprojects } from '../Services/Allapi';
+import { addProjectResponseContext } from '../Contextapi/ConApi';
 
 
 function Add() {
 
+
+    const {addProjectResponse,setAddProjectResponse}=useContext(addProjectResponseContext)
 
     const [show, setShow] = useState(false);
     const [perview, setperview] = useState("")
@@ -83,6 +85,10 @@ function Add() {
                 })
 
                 handleClose()
+
+                setAddProjectResponse(res)
+
+
 
             }
             else {

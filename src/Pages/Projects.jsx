@@ -54,7 +54,15 @@ function Projects() {
       <div className='p-5'>
 
 
-        <h1>PROJECTS</h1>
+        <div className='d-flex justify-content-between my-4'>
+
+          <h1>PROJECTS</h1>
+
+          <input type="search" name='' className='form-control w-25' placeholder='Enter Languages for project Serach' id='' />
+
+        </div>
+
+
 
         {
 

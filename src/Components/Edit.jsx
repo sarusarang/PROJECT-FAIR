@@ -1,24 +1,114 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react';
-import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { Row, Col } from 'react-bootstrap'
+import Button from 'react-bootstrap/Button';
+import { Row, Col } from 'react-bootstrap';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
+import base_url from '../Services/BaseUrl';
+import { toast } from 'react-toastify';
+import { editprojects } from '../Services/Allapi';
 
 
-function Edit() {
+function Edit({project}) {
     const [show, setShow] = useState(false);
 
-    const handleClose = () => setShow(false);
+    const [projectData,setProjectData] =useState({
+       id:project._id, title:project.title,overview:project.overview,language:project.languages,github:project.github,demo:project.demo,projectImage:""     
+    })
+
+    const [imgStatus,setImageStatus]=useState(false)
+    const [preview,setPreview]=useState("")
+
+    useEffect(()=>{
+        
+        if(projectData.projectImage.type=="image/jpg" || projectData.projectImage.type=="image/jpeg" || projectData.projectImage.type=="image/png"){
+            setImageStatus(false)
+            setPreview(URL.createObjectURL(projectData.projectImage))
+        }
+        else{
+            setImageStatus(true)
+            setPreview("")
+        }
+    },[projectData.projectImage])
+
+    
+
+    const handleUpdate=async()=>{
+
+       
+        const {title,overview,language,github,demo,projectImage}=projectData
+        if(!title || !overview || !language || !github || !demo ){
+
+            toast.warning("Invalid Inputs!! Enter Valid Input data in every Fields!!")
+        }
+        else{
+
+            const formData=new FormData()
+            formData.append("title",title)
+            formData.append("overview",overview)
+            formData.append("language",language)
+            formData.append("github",github)
+            formData.append("demo",demo)
+            preview?formData.append("image",projectImage):formData.append("image",project.image)
+     
+            const token=sessionStorage.getItem("token")
+
+            if(preview){
+
+
+                const reqHeader={
+    
+                        "Content-Type":"multipart/form-data",
+                        "Authorization":`Bearer ${token}`
+                   }
+                   const result=await editprojects(projectData.id,formData,reqHeader)
+                   if(result.status==200){
+                    toast.success(`Project ${projectData.title} Updated Successfully`)
+                    handleClose()
+                   }
+                   else{
+                    toast.warning(result.response.data)
+                   }
+                }
+
+
+                else{
+                    const reqHeader={
+    
+                        "Content-Type":"application/json",
+                        "Authorization":`Bearer ${token}`
+                   }
+                   const result=await editprojects(projectData.id,formData,reqHeader)
+                   if(result.status==200){
+                    toast.success(`Project ${projectData.title} Updated Successfully`)
+                    handleClose()
+                   }
+                   else{
+                    console.log(result);
+                    toast.warning(result.response.data)
+                   }
+                }
+            }
+            handleClose()
+     
+           
+    }
+
+    const handleClose = () =>{
+
+        setShow(false);
+        setPreview("")
+        setProjectData({
+            id:project._id, title:project.title,overview:project.overview,language:project.language,github:project.github,demo:project.demo,projectImage:"" 
+        })
+    } 
     const handleShow = () => setShow(true);
     return (
         <>
-            <button className='btn me-3' onClick={handleShow}>
-                <i class="fa-solid fa-pen-to-square fa-xl"></i>
+            <button className='btn ' onClick={handleShow} >
+            <i class="fa-solid fa-pen-to-square fa-2xl"  style={{color:'#18898d'}}></i>
             </button>
-
-
 
             <Modal
                 show={show}
@@ -33,47 +123,47 @@ function Edit() {
                     <div>
                         <Row>
                             <Col>
-                                <label htmlFor="in">
-                                    <input type="file" name="" id="in" style={{ display: 'none' }} />
-                                    <img className='img-fluid' src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Picture_icon_BLACK.svg/1200px-Picture_icon_BLACK.svg.png" alt="" />
-                                </label>
+                            <label >
+                                <input type="file" name="" style={{display:'none'}} onChange={(e)=>{setProjectData({...projectData,projectImage:e.target.files[0]})}} />
+                                <img className='img-fluid' src={preview?preview:`${base_url}/uploads/${project.image}`} alt="" />
+
+                            </label>
+
+                            {
+                                imgStatus &&
+                                <p className='text-danger'>Image extension Invalid!! Image should be JPG,JPEG,PNG</p>
+                            }
+                           
                             </Col>
-                            <Col>
-                                <div>
-                                    <FloatingLabel controlId="titleinp" label="tittle" className="mb-3">
-                                        <Form.Control type="text" placeholder="Project Title" />
+                            <Col className='mb-2'>
+                                <div >
+                                    <FloatingLabel className='mb-3' controlId="titleinp" label="Title" >
+                                        <Form.Control onChange={(e)=>{setProjectData({...projectData,title:e.target.value})}} value={projectData.title} type="text" placeholder="project title" />
                                     </FloatingLabel>
-                                    <FloatingLabel controlId="overviewinp" label="Overview" className="mb-3">
-                                        <Form.Control type="text" placeholder="Brief about Project" />
+                                    <FloatingLabel className='mb-3' controlId="overviewinp" label="OverView">
+                                        <Form.Control onChange={(e)=>{setProjectData({...projectData,overview:e.target.value})}} value={projectData.overview} type="text" placeholder="Brief about Project" />
                                     </FloatingLabel>
-                                    <FloatingLabel controlId="langinp" label="Languges" className="mb-3">
-                                        <Form.Control type="text" placeholder="Languges used" />
+                                    <FloatingLabel className='mb-3' controlId="langinp" label="Languages">
+                                        <Form.Control onChange={(e)=>{setProjectData({...projectData,language:e.target.value})}} value={projectData.language} type="text" placeholder="Languages Used" />
                                     </FloatingLabel>
-
-
-
-
+                                    <FloatingLabel className='mb-3' controlId="githubinp" label="GitHub Url">
+                                        <Form.Control onChange={(e)=>{setProjectData({...projectData,github:e.target.value})}} value={projectData.github} type="text" placeholder="Github Url" />
+                                    </FloatingLabel>
                                 </div>
                             </Col>
-                            <FloatingLabel controlId="githubinp" label="GitHub Url" className="mb-3">
-                                <Form.Control type="text" placeholder="GitHub Urlt" />
-                            </FloatingLabel>
-                            <FloatingLabel controlId="demoinp" label="Demo Url" className="mb-3">
-                                <Form.Control type="text" placeholder="Demo Url " />
-                            </FloatingLabel>
+                            <FloatingLabel controlId="demoinp" label="Demo Url">
+                                        <Form.Control onChange={(e)=>{setProjectData({...projectData,demo:e.target.value})}} value={projectData.demo} type="text" placeholder="Demo Url" />
+                                    </FloatingLabel>
                         </Row>
                     </div>
-
-
-
-
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
-                    <Button variant="primary" className='bg-success'>Save</Button>
+                    <Button variant="primary" onClick={handleUpdate}>Upload</Button>
                 </Modal.Footer>
+
             </Modal>
         </>
     )
